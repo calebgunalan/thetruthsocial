@@ -12,6 +12,7 @@ interface CreatePostProps {
 
 const CreatePost = ({ onPostCreated, userId }: CreatePostProps) => {
   const [content, setContent] = useState("");
+  const [mediaType, setMediaType] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -30,12 +31,14 @@ const CreatePost = ({ onPostCreated, userId }: CreatePostProps) => {
       const { error } = await supabase.from("posts").insert({
         user_id: userId,
         content: content.trim(),
-        post_type: "text",
+        post_type: mediaType || "text",
+        media_type: mediaType,
       });
 
       if (error) throw error;
 
       setContent("");
+      setMediaType(null);
       toast({
         title: "Posted!",
         description: "Your post has been shared.",
@@ -64,22 +67,25 @@ const CreatePost = ({ onPostCreated, userId }: CreatePostProps) => {
       <div className="flex items-center justify-between hairline-t pt-3">
         <div className="flex gap-2">
           <Button
-            variant="ghost"
+            variant={mediaType === "image" ? "default" : "ghost"}
             size="sm"
+            onClick={() => setMediaType(mediaType === "image" ? null : "image")}
             className="text-muted-foreground hover:text-primary transition-smooth"
           >
             <Image className="w-4 h-4" />
           </Button>
           <Button
-            variant="ghost"
+            variant={mediaType === "short_video" ? "default" : "ghost"}
             size="sm"
+            onClick={() => setMediaType(mediaType === "short_video" ? null : "short_video")}
             className="text-muted-foreground hover:text-primary transition-smooth"
           >
             <Video className="w-4 h-4" />
           </Button>
           <Button
-            variant="ghost"
+            variant={mediaType === "music" ? "default" : "ghost"}
             size="sm"
+            onClick={() => setMediaType(mediaType === "music" ? null : "music")}
             className="text-muted-foreground hover:text-primary transition-smooth"
           >
             <Music className="w-4 h-4" />

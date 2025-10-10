@@ -5,6 +5,8 @@ import { useToast } from "@/components/ui/use-toast";
 import Navbar from "@/components/Navbar";
 import PostCard from "@/components/PostCard";
 import CreatePost from "@/components/CreatePost";
+import Stories from "@/components/Stories";
+import MessagingPanel from "@/components/MessagingPanel";
 import { Loader2 } from "lucide-react";
 
 interface Post {
@@ -110,6 +112,8 @@ const Feed = () => {
       <Navbar />
       
       <main className="max-w-2xl mx-auto pt-20 px-4 pb-8">
+        {user && <Stories currentUserId={user.id} />}
+        
         <CreatePost onPostCreated={handlePostCreated} userId={user?.id} />
         
         <div className="space-y-4 mt-6">
@@ -126,6 +130,8 @@ const Feed = () => {
           )}
         </div>
       </main>
+      
+      {user && <MessagingPanel currentUserId={user.id} />}
     </div>
   );
 };
