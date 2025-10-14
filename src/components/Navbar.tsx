@@ -56,22 +56,34 @@ const Navbar = () => {
               <Home className="w-5 h-5" />
               <span>Home</span>
             </Link>
-            <button className="flex items-center gap-2 text-foreground hover:text-primary transition-smooth">
+            <Link
+              to="/explore"
+              className="flex items-center gap-2 text-foreground hover:text-primary transition-smooth"
+            >
               <Search className="w-5 h-5" />
               <span>Explore</span>
-            </button>
-            <button className="flex items-center gap-2 text-foreground hover:text-primary transition-smooth">
+            </Link>
+            <Link
+              to="/notifications"
+              className="flex items-center gap-2 text-foreground hover:text-primary transition-smooth"
+            >
               <Bell className="w-5 h-5" />
               <span>Notifications</span>
-            </button>
-            <button className="flex items-center gap-2 text-foreground hover:text-primary transition-smooth">
+            </Link>
+            <Link
+              to="/messages"
+              className="flex items-center gap-2 text-foreground hover:text-primary transition-smooth"
+            >
               <MessageCircle className="w-5 h-5" />
               <span>Messages</span>
-            </button>
-            <button className="flex items-center gap-2 text-foreground hover:text-primary transition-smooth">
+            </Link>
+            <Link
+              to="/profile"
+              className="flex items-center gap-2 text-foreground hover:text-primary transition-smooth"
+            >
               <User className="w-5 h-5" />
               <span>Profile</span>
-            </button>
+            </Link>
             <Button
               onClick={handleSignOut}
               variant="ghost"
@@ -100,22 +112,38 @@ const Navbar = () => {
               <Home className="w-5 h-5" />
               <span>Home</span>
             </Link>
-            <button className="flex items-center gap-3 px-4 py-2 w-full text-left text-foreground hover:bg-secondary rounded-lg transition-smooth">
+            <Link
+              to="/explore"
+              className="flex items-center gap-3 px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-smooth"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
               <Search className="w-5 h-5" />
               <span>Explore</span>
-            </button>
-            <button className="flex items-center gap-3 px-4 py-2 w-full text-left text-foreground hover:bg-secondary rounded-lg transition-smooth">
+            </Link>
+            <Link
+              to="/notifications"
+              className="flex items-center gap-3 px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-smooth"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
               <Bell className="w-5 h-5" />
               <span>Notifications</span>
-            </button>
-            <button className="flex items-center gap-3 px-4 py-2 w-full text-left text-foreground hover:bg-secondary rounded-lg transition-smooth">
+            </Link>
+            <Link
+              to="/messages"
+              className="flex items-center gap-3 px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-smooth"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
               <MessageCircle className="w-5 h-5" />
               <span>Messages</span>
-            </button>
-            <button className="flex items-center gap-3 px-4 py-2 w-full text-left text-foreground hover:bg-secondary rounded-lg transition-smooth">
+            </Link>
+            <Link
+              to="/profile"
+              className="flex items-center gap-3 px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-smooth"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
               <User className="w-5 h-5" />
               <span>Profile</span>
-            </button>
+            </Link>
             <button
               onClick={handleSignOut}
               className="flex items-center gap-3 px-4 py-2 w-full text-left text-destructive hover:bg-secondary rounded-lg transition-smooth"
