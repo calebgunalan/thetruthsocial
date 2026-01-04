@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -13,11 +13,14 @@ import {
   LogOut,
   Menu,
   X,
+  Tv,
+  MapPin,
 } from "lucide-react";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
 
   const handleSignOut = async () => {
@@ -37,58 +40,48 @@ const Navbar = () => {
     }
   };
 
+  const isActive = (path: string) => location.pathname === path;
+
+  const navLinks = [
+    { to: "/feed", icon: Home, label: "Home" },
+    { to: "/explore", icon: Search, label: "Explore" },
+    { to: "/channels", icon: Tv, label: "Channels" },
+    { to: "/notifications", icon: Bell, label: "Alerts" },
+    { to: "/messages", icon: MessageCircle, label: "Messages" },
+    { to: "/profile", icon: User, label: "Profile" },
+  ];
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-card hairline-b shadow-subtle backdrop-blur-sm bg-opacity-95">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/feed" className="flex items-center gap-2 transition-smooth hover:opacity-80">
-            <Sparkles className="w-6 h-6 text-primary" />
-            <span className="text-xl font-bold gradient-silver bg-clip-text text-transparent">
+            <img src="/logo.png" alt="The Truth" className="w-8 h-8" />
+            <span className="text-xl font-bold bg-gradient-to-r from-gray-600 to-gray-800 dark:from-gray-300 dark:to-gray-100 bg-clip-text text-transparent">
               The Truth
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-6">
-            <Link
-              to="/feed"
-              className="flex items-center gap-2 text-foreground hover:text-primary transition-smooth"
-            >
-              <Home className="w-5 h-5" />
-              <span>Home</span>
-            </Link>
-            <Link
-              to="/explore"
-              className="flex items-center gap-2 text-foreground hover:text-primary transition-smooth"
-            >
-              <Search className="w-5 h-5" />
-              <span>Explore</span>
-            </Link>
-            <Link
-              to="/notifications"
-              className="flex items-center gap-2 text-foreground hover:text-primary transition-smooth"
-            >
-              <Bell className="w-5 h-5" />
-              <span>Notifications</span>
-            </Link>
-            <Link
-              to="/messages"
-              className="flex items-center gap-2 text-foreground hover:text-primary transition-smooth"
-            >
-              <MessageCircle className="w-5 h-5" />
-              <span>Messages</span>
-            </Link>
-            <Link
-              to="/profile"
-              className="flex items-center gap-2 text-foreground hover:text-primary transition-smooth"
-            >
-              <User className="w-5 h-5" />
-              <span>Profile</span>
-            </Link>
+          <div className="hidden md:flex items-center gap-1">
+            {navLinks.map(({ to, icon: Icon, label }) => (
+              <Link
+                key={to}
+                to={to}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-smooth ${
+                  isActive(to)
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                }`}
+              >
+                <Icon className="w-5 h-5" />
+                <span className="text-sm font-medium">{label}</span>
+              </Link>
+            ))}
             <Button
               onClick={handleSignOut}
               variant="ghost"
               size="sm"
-              className="text-muted-foreground hover:text-foreground"
+              className="ml-2 text-muted-foreground hover:text-destructive"
             >
               <LogOut className="w-4 h-4" />
             </Button>
@@ -96,57 +89,35 @@ const Navbar = () => {
 
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden text-foreground"
+            className="md:hidden text-foreground p-2"
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
 
         {isMobileMenuOpen && (
-          <div className="md:hidden py-4 hairline-t space-y-2">
-            <Link
-              to="/feed"
-              className="flex items-center gap-3 px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-smooth"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <Home className="w-5 h-5" />
-              <span>Home</span>
-            </Link>
-            <Link
-              to="/explore"
-              className="flex items-center gap-3 px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-smooth"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <Search className="w-5 h-5" />
-              <span>Explore</span>
-            </Link>
-            <Link
-              to="/notifications"
-              className="flex items-center gap-3 px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-smooth"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <Bell className="w-5 h-5" />
-              <span>Notifications</span>
-            </Link>
-            <Link
-              to="/messages"
-              className="flex items-center gap-3 px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-smooth"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <MessageCircle className="w-5 h-5" />
-              <span>Messages</span>
-            </Link>
-            <Link
-              to="/profile"
-              className="flex items-center gap-3 px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-smooth"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <User className="w-5 h-5" />
-              <span>Profile</span>
-            </Link>
+          <div className="md:hidden py-4 hairline-t space-y-1">
+            {navLinks.map(({ to, icon: Icon, label }) => (
+              <Link
+                key={to}
+                to={to}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-smooth ${
+                  isActive(to)
+                    ? "bg-primary/10 text-primary"
+                    : "text-foreground hover:bg-secondary"
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Icon className="w-5 h-5" />
+                <span>{label}</span>
+              </Link>
+            ))}
             <button
-              onClick={handleSignOut}
-              className="flex items-center gap-3 px-4 py-2 w-full text-left text-destructive hover:bg-secondary rounded-lg transition-smooth"
+              onClick={() => {
+                handleSignOut();
+                setIsMobileMenuOpen(false);
+              }}
+              className="flex items-center gap-3 px-4 py-3 w-full text-left text-destructive hover:bg-secondary rounded-lg transition-smooth"
             >
               <LogOut className="w-5 h-5" />
               <span>Sign Out</span>
