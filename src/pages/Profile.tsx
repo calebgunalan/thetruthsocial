@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -29,8 +29,10 @@ import {
   Grid,
   Loader2,
   Building2,
-  Plus
+  Plus,
+  Camera
 } from "lucide-react";
+import { useFileUpload } from "@/hooks/useFileUpload";
 
 interface Post {
   id: string;
@@ -86,6 +88,8 @@ const Profile = () => {
   const [newBusinessName, setNewBusinessName] = useState("");
   const [newBusinessDesc, setNewBusinessDesc] = useState("");
   const [newBusinessCategory, setNewBusinessCategory] = useState("");
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const { uploadFile, uploading } = useFileUpload();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -229,6 +233,28 @@ const Profile = () => {
     }
   };
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const result = await uploadFile(file, "avatars", user.id);
+    if (result) {
+      try {
+        const { error } = await supabase
+          .from("profiles")
+          .update({ avatar_url: result.url })
+          .eq("id", user.id);
+
+        if (error) throw error;
+
+        toast({ title: "Avatar updated!" });
+        fetchProfile();
+      } catch (error: any) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      }
+    }
+  };
+
   const handleUpdateProfile = async () => {
     try {
       const { error } = await supabase
@@ -290,12 +316,32 @@ const Profile = () => {
         <div className="mb-8">
           <div className="hairline rounded-lg p-6">
             <div className="flex flex-col md:flex-row items-start gap-6">
-              <Avatar className="w-24 h-24">
-                <AvatarImage src={profile?.avatar_url || undefined} />
-                <AvatarFallback className="text-2xl">
-                  <User className="w-12 h-12" />
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative group">
+                <Avatar className="w-24 h-24">
+                  <AvatarImage src={profile?.avatar_url || undefined} />
+                  <AvatarFallback className="text-2xl">
+                    <User className="w-12 h-12" />
+                  </AvatarFallback>
+                </Avatar>
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                  className="hidden"
+                />
+                <button
+                  onClick={() => avatarInputRef.current?.click()}
+                  disabled={uploading}
+                  className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  {uploading ? (
+                    <Loader2 className="w-6 h-6 text-white animate-spin" />
+                  ) : (
+                    <Camera className="w-6 h-6 text-white" />
+                  )}
+                </button>
+              </div>
               
               <div className="flex-1 w-full">
                 {isEditing ? (
@@ -507,22 +553,24 @@ const Profile = () => {
               {collections.map((collection) => (
                 <div
                   key={collection.id}
-                  className="aspect-square rounded-lg hairline bg-muted flex flex-col items-center justify-center cursor-pointer hover:bg-accent transition-smooth"
+                  className="p-4 rounded-lg hairline hover:bg-accent transition-smooth cursor-pointer"
                 >
-                  <Bookmark className="w-8 h-8 text-muted-foreground mb-2" />
+                  <div className="w-full aspect-video bg-muted rounded-lg mb-3 flex items-center justify-center">
+                    <Bookmark className="w-8 h-8 text-muted-foreground" />
+                  </div>
                   <p className="font-medium">{collection.name}</p>
                 </div>
               ))}
-              {collections.length === 0 && (
-                <div className="col-span-full text-center py-12">
-                  <Bookmark className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">No saved collections</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Bookmark posts to save them here
-                  </p>
-                </div>
-              )}
             </div>
+            {collections.length === 0 && (
+              <div className="text-center py-12">
+                <Bookmark className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">No saved collections yet</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Bookmark posts to save them here
+                </p>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </main>
