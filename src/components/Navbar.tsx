@@ -14,7 +14,7 @@ import {
   Menu,
   X,
   Tv,
-  MapPin,
+  Play,
 } from "lucide-react";
 
 const Navbar = () => {
@@ -45,6 +45,7 @@ const Navbar = () => {
   const navLinks = [
     { to: "/feed", icon: Home, label: "Home" },
     { to: "/explore", icon: Search, label: "Explore" },
+    { to: "/shorts", icon: Play, label: "Shorts" },
     { to: "/channels", icon: Tv, label: "Channels" },
     { to: "/notifications", icon: Bell, label: "Alerts" },
     { to: "/messages", icon: MessageCircle, label: "Messages" },

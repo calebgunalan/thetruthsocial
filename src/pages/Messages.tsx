@@ -18,21 +18,27 @@ import {
   Send, 
   MapPin, 
   Plus, 
-  Mic, 
-  MicOff,
+  Mic,
   Lock,
   Timer,
   Loader2,
   Phone,
   Video,
   Image,
-  Smile
+  X,
+  Play,
+  Volume2
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import AudioRecorder from "@/components/media/AudioRecorder";
+import FileUploader from "@/components/media/FileUploader";
+import MediaDisplay from "@/components/media/MediaDisplay";
+import { useFileUpload } from "@/hooks/useFileUpload";
 
 interface Message {
   id: string;
   content: string | null;
+  media_url: string | null;
   sender_id: string;
   message_type: string;
   location_lat: number | null;
@@ -70,12 +76,16 @@ const Messages = () => {
   const [showNewChat, setShowNewChat] = useState(false);
   const [searchUser, setSearchUser] = useState("");
   const [foundUsers, setFoundUsers] = useState<Profile[]>([]);
-  const [isRecording, setIsRecording] = useState(false);
+  const [showAudioRecorder, setShowAudioRecorder] = useState(false);
+  const [showMediaUpload, setShowMediaUpload] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isSecret, setIsSecret] = useState(false);
   const [selfDestructMinutes, setSelfDestructMinutes] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { uploadFile, uploading, progress, getMediaType } = useFileUpload();
 
   useEffect(() => {
     checkUser();
@@ -90,7 +100,8 @@ const Messages = () => {
   useEffect(() => {
     if (selectedConversation) {
       fetchMessages(selectedConversation);
-      subscribeToMessages(selectedConversation);
+      const unsubscribe = subscribeToMessages(selectedConversation);
+      return unsubscribe;
     }
   }, [selectedConversation]);
 
@@ -156,7 +167,6 @@ const Messages = () => {
           filter: `conversation_id=eq.${conversationId}`,
         },
         async (payload) => {
-          // Fetch the complete message with profile
           const { data } = await supabase
             .from("messages")
             .select(`*, profiles!sender_id (display_name, avatar_url)`)
@@ -190,7 +200,6 @@ const Messages = () => {
 
   const startConversation = async (otherUserId: string) => {
     try {
-      // Create conversation
       const { data: conv, error: convError } = await supabase
         .from("conversations")
         .insert({
@@ -202,7 +211,6 @@ const Messages = () => {
 
       if (convError) throw convError;
 
-      // Add participants
       await supabase.from("conversation_participants").insert([
         { conversation_id: conv.id, user_id: user.id },
         { conversation_id: conv.id, user_id: otherUserId },
@@ -221,18 +229,18 @@ const Messages = () => {
     }
   };
 
-  const sendMessage = async () => {
-    if (!newMessage.trim() || !selectedConversation) return;
+  const sendMessage = async (type: "text" | "voice" | "media" = "text", mediaUrl?: string) => {
+    if ((type === "text" && !newMessage.trim()) || !selectedConversation) return;
 
     try {
       const messageData: any = {
         conversation_id: selectedConversation,
         sender_id: user.id,
-        message_type: "text",
-        content: newMessage,
+        message_type: type,
+        content: type === "text" ? newMessage : (type === "voice" ? "🎤 Voice message" : "📎 Media"),
+        media_url: mediaUrl || null,
       };
 
-      // Add self-destruct if set
       if (selfDestructMinutes) {
         const destructAt = new Date();
         destructAt.setMinutes(destructAt.getMinutes() + selfDestructMinutes);
@@ -244,8 +252,41 @@ const Messages = () => {
       if (error) throw error;
 
       setNewMessage("");
+      setShowAudioRecorder(false);
+      setShowMediaUpload(false);
+      handleRemoveFile();
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  };
+
+  const handleVoiceRecordingComplete = async (audioBlob: Blob) => {
+    const file = new File([audioBlob], `voice-${Date.now()}.webm`, { type: "audio/webm" });
+    const result = await uploadFile(file, "audio", user.id);
+    if (result) {
+      await sendMessage("voice", result.url);
+    }
+  };
+
+  const handleFileSelect = (file: File) => {
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const handleRemoveFile = () => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setSelectedFile(null);
+    setPreviewUrl(null);
+  };
+
+  const handleSendMedia = async () => {
+    if (!selectedFile) return;
+    
+    const result = await uploadFile(selectedFile, "messages", user.id);
+    if (result) {
+      await sendMessage("media", result.url);
     }
   };
 
@@ -456,7 +497,27 @@ const Messages = () => {
                             {msg.message_type === "location" ? (
                               <div className="flex items-center gap-2">
                                 <MapPin className="w-4 h-4" />
-                                <span className="text-sm">Shared location</span>
+                                <a 
+                                  href={`https://maps.google.com/?q=${msg.location_lat},${msg.location_lng}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm underline"
+                                >
+                                  View location
+                                </a>
+                              </div>
+                            ) : msg.message_type === "voice" && msg.media_url ? (
+                              <div className="flex items-center gap-2">
+                                <Volume2 className="w-4 h-4" />
+                                <audio src={msg.media_url} controls className="h-8 max-w-[200px]" />
+                              </div>
+                            ) : msg.message_type === "media" && msg.media_url ? (
+                              <div className="max-w-[250px]">
+                                <MediaDisplay
+                                  url={msg.media_url}
+                                  type="image"
+                                  className="rounded"
+                                />
                               </div>
                             ) : (
                               <p className="text-sm">{msg.content}</p>
@@ -478,10 +539,10 @@ const Messages = () => {
                 </ScrollArea>
 
                 {/* Message Input */}
-                <div className="p-4 hairline-t">
+                <div className="p-4 hairline-t space-y-3">
                   {/* Self-destruct options for secret chats */}
                   {currentConv?.is_secret && (
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2">
                       <Timer className="w-4 h-4 text-muted-foreground" />
                       <select
                         value={selfDestructMinutes || ""}
@@ -496,38 +557,89 @@ const Messages = () => {
                       </select>
                     </div>
                   )}
-                  
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="icon">
-                      <Image className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={shareLocation}
-                      title="Share location"
-                    >
-                      <MapPin className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant={isRecording ? "destructive" : "ghost"}
-                      size="icon"
-                      onClick={() => setIsRecording(!isRecording)}
-                      title="Voice message"
-                    >
-                      {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-                    </Button>
-                    <Input
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-                      placeholder="Type a message..."
-                      className="flex-1"
+
+                  {/* Audio Recorder */}
+                  {showAudioRecorder && (
+                    <AudioRecorder
+                      onRecordingComplete={handleVoiceRecordingComplete}
+                      onCancel={() => setShowAudioRecorder(false)}
+                      uploading={uploading}
                     />
-                    <Button onClick={sendMessage} size="icon" disabled={!newMessage.trim()}>
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  )}
+
+                  {/* Media Upload Preview */}
+                  {showMediaUpload && (
+                    <div className="relative">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground z-10"
+                        onClick={() => {
+                          setShowMediaUpload(false);
+                          handleRemoveFile();
+                        }}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                      <FileUploader
+                        onFileSelect={handleFileSelect}
+                        onRemove={handleRemoveFile}
+                        selectedFile={selectedFile}
+                        previewUrl={previewUrl}
+                        uploading={uploading}
+                        progress={progress}
+                        accept="image/*,video/*"
+                        maxSize={50}
+                      />
+                      {selectedFile && (
+                        <Button 
+                          onClick={handleSendMedia} 
+                          disabled={uploading}
+                          className="w-full mt-2"
+                        >
+                          {uploading ? "Uploading..." : "Send Media"}
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                  
+                  {!showAudioRecorder && !showMediaUpload && (
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => setShowMediaUpload(true)}
+                      >
+                        <Image className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={shareLocation}
+                        title="Share location"
+                      >
+                        <MapPin className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setShowAudioRecorder(true)}
+                        title="Voice message"
+                      >
+                        <Mic className="h-4 w-4" />
+                      </Button>
+                      <Input
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+                        placeholder="Type a message..."
+                        className="flex-1"
+                      />
+                      <Button onClick={() => sendMessage()} size="icon" disabled={!newMessage.trim()}>
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </>
             ) : (

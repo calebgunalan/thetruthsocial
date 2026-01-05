@@ -10,7 +10,10 @@ import {
   Repeat2, 
   Bookmark,
   MoreHorizontal,
-  Pin
+  Pin,
+  Play,
+  Volume2,
+  VolumeX
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -28,6 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import MediaDisplay from "@/components/media/MediaDisplay";
 
 interface PostCardProps {
   post: {
@@ -356,24 +360,14 @@ const PostCard = ({ post, currentUserId, onRefresh }: PostCardProps) => {
             <p className="text-foreground mb-3 whitespace-pre-wrap">{post.content}</p>
 
             {post.media_url && (
-              <div className="mb-3 rounded-lg overflow-hidden hairline">
-                {post.media_type === "image" && (
-                  <img
-                    src={post.media_url}
-                    alt="Post media"
-                    className="w-full object-cover max-h-96"
-                  />
-                )}
-                {(post.media_type === "video" || post.media_type === "short_video") && (
-                  <video
-                    src={post.media_url}
-                    controls
-                    className="w-full object-cover max-h-96"
-                  />
-                )}
-                {post.media_type === "music" && (
-                  <audio src={post.media_url} controls className="w-full" />
-                )}
+              <div className="mb-3">
+                <MediaDisplay
+                  url={post.media_url}
+                  type={post.media_type}
+                  alt="Post media"
+                  className="max-h-96"
+                  showControls={true}
+                />
               </div>
             )}
 

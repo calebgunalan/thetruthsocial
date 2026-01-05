@@ -908,8 +908,10 @@ export type Database = {
           post_type: string
           repost_count: number | null
           shares_count: number | null
+          thumbnail_url: string | null
           updated_at: string | null
           user_id: string
+          video_duration: number | null
         }
         Insert: {
           comments_count?: number | null
@@ -923,8 +925,10 @@ export type Database = {
           post_type: string
           repost_count?: number | null
           shares_count?: number | null
+          thumbnail_url?: string | null
           updated_at?: string | null
           user_id: string
+          video_duration?: number | null
         }
         Update: {
           comments_count?: number | null
@@ -938,8 +942,10 @@ export type Database = {
           post_type?: string
           repost_count?: number | null
           shares_count?: number | null
+          thumbnail_url?: string | null
           updated_at?: string | null
           user_id?: string
+          video_duration?: number | null
         }
         Relationships: [
           {

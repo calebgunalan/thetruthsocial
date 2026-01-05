@@ -11,6 +11,7 @@ import Notifications from "./pages/Notifications";
 import Messages from "./pages/Messages";
 import Profile from "./pages/Profile";
 import Channels from "./pages/Channels";
+import Shorts from "./pages/Shorts";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/messages" element={<Messages />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/channels" element={<Channels />} />
+          <Route path="/shorts" element={<Shorts />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
