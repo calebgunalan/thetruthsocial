@@ -5,6 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 import Navbar from "@/components/Navbar";
 import PostCard from "@/components/PostCard";
 import BusinessProfileCard from "@/components/BusinessProfileCard";
+import CloseFriendsModal from "@/components/CloseFriendsModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,7 +31,8 @@ import {
   Loader2,
   Building2,
   Plus,
-  Camera
+  Camera,
+  Star
 } from "lucide-react";
 import { useFileUpload } from "@/hooks/useFileUpload";
 
@@ -85,6 +87,7 @@ const Profile = () => {
   const [bio, setBio] = useState("");
   const [loading, setLoading] = useState(true);
   const [showBusinessForm, setShowBusinessForm] = useState(false);
+  const [showCloseFriends, setShowCloseFriends] = useState(false);
   const [newBusinessName, setNewBusinessName] = useState("");
   const [newBusinessDesc, setNewBusinessDesc] = useState("");
   const [newBusinessCategory, setNewBusinessCategory] = useState("");
@@ -410,12 +413,30 @@ const Profile = () => {
                     {profile?.bio && (
                       <p className="text-sm">{profile.bio}</p>
                     )}
+                    
+                    {/* Close Friends Button */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-4"
+                      onClick={() => setShowCloseFriends(true)}
+                    >
+                      <Star className="w-4 h-4 mr-2" />
+                      Close Friends
+                    </Button>
                   </>
                 )}
               </div>
             </div>
           </div>
         </div>
+
+        {/* Close Friends Modal */}
+        <CloseFriendsModal
+          open={showCloseFriends}
+          onOpenChange={setShowCloseFriends}
+          currentUserId={user?.id}
+        />
 
         {/* Business Profile */}
         {businessProfile ? (
