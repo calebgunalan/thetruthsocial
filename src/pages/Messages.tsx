@@ -33,6 +33,7 @@ import { formatDistanceToNow } from "date-fns";
 import AudioRecorder from "@/components/media/AudioRecorder";
 import FileUploader from "@/components/media/FileUploader";
 import MediaDisplay from "@/components/media/MediaDisplay";
+import CallModal from "@/components/CallModal";
 import { useFileUpload } from "@/hooks/useFileUpload";
 
 interface Message {
@@ -82,6 +83,9 @@ const Messages = () => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isSecret, setIsSecret] = useState(false);
   const [selfDestructMinutes, setSelfDestructMinutes] = useState<number | null>(null);
+  const [showCallModal, setShowCallModal] = useState(false);
+  const [callType, setCallType] = useState<"voice" | "video">("voice");
+  const [callRecipient, setCallRecipient] = useState<{ id: string; name: string; avatar?: string } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -461,10 +465,34 @@ const Messages = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon">
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => {
+                        setCallType("voice");
+                        setCallRecipient({
+                          id: "recipient-id",
+                          name: currentConv?.name || "User",
+                          avatar: currentConv?.avatar_url || undefined,
+                        });
+                        setShowCallModal(true);
+                      }}
+                    >
                       <Phone className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="icon">
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => {
+                        setCallType("video");
+                        setCallRecipient({
+                          id: "recipient-id",
+                          name: currentConv?.name || "User",
+                          avatar: currentConv?.avatar_url || undefined,
+                        });
+                        setShowCallModal(true);
+                      }}
+                    >
                       <Video className="w-4 h-4" />
                     </Button>
                   </div>
@@ -656,6 +684,19 @@ const Messages = () => {
           </div>
         </div>
       </main>
+
+      {/* Call Modal */}
+      {callRecipient && (
+        <CallModal
+          open={showCallModal}
+          onOpenChange={setShowCallModal}
+          currentUserId={user?.id || ""}
+          recipientId={callRecipient.id}
+          recipientName={callRecipient.name}
+          recipientAvatar={callRecipient.avatar}
+          callType={callType}
+        />
+      )}
     </div>
   );
 };
