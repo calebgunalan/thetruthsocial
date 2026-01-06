@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import {
-  Sparkles,
   Home,
   Search,
   Bell,
@@ -15,6 +14,8 @@ import {
   X,
   Tv,
   Play,
+  Music2,
+  Bookmark,
 } from "lucide-react";
 
 const Navbar = () => {
@@ -47,6 +48,8 @@ const Navbar = () => {
     { to: "/explore", icon: Search, label: "Explore" },
     { to: "/shorts", icon: Play, label: "Shorts" },
     { to: "/channels", icon: Tv, label: "Channels" },
+    { to: "/music", icon: Music2, label: "Music" },
+    { to: "/collections", icon: Bookmark, label: "Saved" },
     { to: "/notifications", icon: Bell, label: "Alerts" },
     { to: "/messages", icon: MessageCircle, label: "Messages" },
     { to: "/profile", icon: User, label: "Profile" },

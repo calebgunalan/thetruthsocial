@@ -13,7 +13,9 @@ import {
   UserPlus, 
   Repeat2, 
   CheckCheck,
-  Loader2 
+  Loader2,
+  AtSign,
+  Eye
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -42,6 +44,32 @@ const Notifications = () => {
   useEffect(() => {
     if (user) {
       fetchNotifications();
+      
+      // Subscribe to real-time notifications
+      const channel = supabase
+        .channel('notifications-realtime')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${user.id}`,
+          },
+          (payload) => {
+            const newNotification = payload.new as Notification;
+            setNotifications((prev) => [newNotification, ...prev]);
+            toast({
+              title: newNotification.title,
+              description: newNotification.message || undefined,
+            });
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [user]);
 
@@ -112,6 +140,10 @@ const Notifications = () => {
         return <UserPlus className="w-5 h-5 text-green-500" />;
       case "repost":
         return <Repeat2 className="w-5 h-5 text-purple-500" />;
+      case "mention":
+        return <AtSign className="w-5 h-5 text-orange-500" />;
+      case "story_view":
+        return <Eye className="w-5 h-5 text-cyan-500" />;
       default:
         return <Bell className="w-5 h-5 text-primary" />;
     }
