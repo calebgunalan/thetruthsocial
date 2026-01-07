@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -7,7 +7,9 @@ import PostCard from "@/components/PostCard";
 import CreatePost from "@/components/CreatePost";
 import Stories from "@/components/Stories";
 import MessagingPanel from "@/components/MessagingPanel";
-import { Loader2 } from "lucide-react";
+import PollCard from "@/components/PollCard";
+import { Loader2, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Post {
   id: string;
@@ -17,6 +19,10 @@ interface Post {
   post_type: string;
   likes_count: number;
   comments_count: number;
+  repost_count: number | null;
+  is_pinned: boolean | null;
+  thumbnail_url: string | null;
+  video_duration: number | null;
   created_at: string;
   profiles: {
     id: string;
@@ -27,16 +33,30 @@ interface Post {
   };
 }
 
+interface Poll {
+  id: string;
+  question: string;
+  ends_at: string;
+  created_at: string;
+  post_id: string;
+  options: {
+    id: string;
+    option_text: string;
+    vote_count: number;
+  }[];
+}
+
 const Feed = () => {
   const [posts, setPosts] = useState<Post[]>([]);
+  const [polls, setPolls] = useState<Map<string, Poll>>(new Map());
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [newPostsCount, setNewPostsCount] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
     checkUser();
-    fetchPosts();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -51,6 +71,13 @@ const Feed = () => {
       authListener.subscription.unsubscribe();
     };
   }, [navigate]);
+
+  useEffect(() => {
+    if (user) {
+      fetchPosts();
+      setupRealtime();
+    }
+  }, [user]);
 
   const checkUser = async () => {
     const {
@@ -84,6 +111,15 @@ const Feed = () => {
 
       if (error) throw error;
       setPosts(data || []);
+      
+      // Fetch polls for posts with poll type
+      const pollPostIds = (data || [])
+        .filter(p => p.post_type === 'poll')
+        .map(p => p.id);
+      
+      if (pollPostIds.length > 0) {
+        await fetchPolls(pollPostIds);
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -93,6 +129,70 @@ const Feed = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchPolls = async (postIds: string[]) => {
+    const { data: pollsData } = await supabase
+      .from("polls")
+      .select(`
+        *,
+        poll_options (id, option_text, vote_count)
+      `)
+      .in("post_id", postIds);
+
+    if (pollsData) {
+      const pollMap = new Map<string, Poll>();
+      pollsData.forEach((poll: any) => {
+        pollMap.set(poll.post_id, {
+          ...poll,
+          options: poll.poll_options || [],
+        });
+      });
+      setPolls(pollMap);
+    }
+  };
+
+  const setupRealtime = () => {
+    const channel = supabase
+      .channel('feed-posts')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'posts',
+        },
+        (payload) => {
+          // Show new posts notification instead of auto-inserting
+          setNewPostsCount(prev => prev + 1);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'posts',
+        },
+        (payload) => {
+          // Update post in place
+          setPosts(prev => prev.map(post => 
+            post.id === payload.new.id 
+              ? { ...post, ...payload.new }
+              : post
+          ));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
+
+  const loadNewPosts = () => {
+    setNewPostsCount(0);
+    fetchPosts();
   };
 
   const handlePostCreated = () => {
@@ -116,10 +216,44 @@ const Feed = () => {
         
         <CreatePost onPostCreated={handlePostCreated} userId={user?.id} />
         
+        {/* New posts notification */}
+        {newPostsCount > 0 && (
+          <Button
+            onClick={loadNewPosts}
+            className="w-full mt-4 mb-2 bg-primary/10 text-primary hover:bg-primary/20"
+            variant="ghost"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            {newPostsCount} new {newPostsCount === 1 ? 'post' : 'posts'}
+          </Button>
+        )}
+        
         <div className="space-y-4 mt-6">
-          {posts.map((post) => (
-            <PostCard key={post.id} post={post} currentUserId={user?.id} />
-          ))}
+          {posts.map((post) => {
+            // If it's a poll post, render PollCard
+            if (post.post_type === 'poll' && polls.has(post.id)) {
+              const poll = polls.get(post.id)!;
+              return (
+                <div key={post.id} className="space-y-2">
+                  <PostCard post={post} currentUserId={user?.id} onRefresh={fetchPosts} />
+                  <PollCard 
+                    poll={poll} 
+                    options={poll.options} 
+                    currentUserId={user?.id} 
+                  />
+                </div>
+              );
+            }
+            
+            return (
+              <PostCard 
+                key={post.id} 
+                post={post} 
+                currentUserId={user?.id} 
+                onRefresh={fetchPosts}
+              />
+            );
+          })}
           
           {posts.length === 0 && (
             <div className="text-center py-12">

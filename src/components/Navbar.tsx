@@ -16,6 +16,7 @@ import {
   Play,
   Music2,
   Bookmark,
+  Building2,
 } from "lucide-react";
 
 const Navbar = () => {
@@ -49,6 +50,7 @@ const Navbar = () => {
     { to: "/shorts", icon: Play, label: "Shorts" },
     { to: "/channels", icon: Tv, label: "Channels" },
     { to: "/music", icon: Music2, label: "Music" },
+    { to: "/business", icon: Building2, label: "Business" },
     { to: "/collections", icon: Bookmark, label: "Saved" },
     { to: "/notifications", icon: Bell, label: "Alerts" },
     { to: "/messages", icon: MessageCircle, label: "Messages" },
