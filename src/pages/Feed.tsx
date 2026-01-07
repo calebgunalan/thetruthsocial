@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -46,12 +46,18 @@ interface Poll {
   }[];
 }
 
+const POSTS_PER_PAGE = 20;
+
 const Feed = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [polls, setPolls] = useState<Map<string, Poll>>(new Map());
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [newPostsCount, setNewPostsCount] = useState(0);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -75,9 +81,34 @@ const Feed = () => {
   useEffect(() => {
     if (user) {
       fetchPosts();
-      setupRealtime();
+      const cleanup = setupRealtime();
+      return cleanup;
     }
   }, [user]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (loading || loadingMore || !hasMore) return;
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          loadMorePosts();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [loading, loadingMore, hasMore, posts]);
 
   const checkUser = async () => {
     const {
@@ -107,10 +138,11 @@ const Feed = () => {
         `
         )
         .order("created_at", { ascending: false })
-        .limit(50);
+        .limit(POSTS_PER_PAGE);
 
       if (error) throw error;
       setPosts(data || []);
+      setHasMore((data?.length || 0) === POSTS_PER_PAGE);
       
       // Fetch polls for posts with poll type
       const pollPostIds = (data || [])
@@ -131,6 +163,54 @@ const Feed = () => {
     }
   };
 
+  const loadMorePosts = async () => {
+    if (loadingMore || !hasMore || posts.length === 0) return;
+    
+    setLoadingMore(true);
+    try {
+      const lastPost = posts[posts.length - 1];
+      const { data, error } = await supabase
+        .from("posts")
+        .select(
+          `
+          *,
+          profiles (
+            id,
+            username,
+            display_name,
+            avatar_url,
+            is_verified
+          )
+        `
+        )
+        .order("created_at", { ascending: false })
+        .lt("created_at", lastPost.created_at)
+        .limit(POSTS_PER_PAGE);
+
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        setPosts(prev => [...prev, ...data]);
+        setHasMore(data.length === POSTS_PER_PAGE);
+        
+        // Fetch polls for new posts
+        const pollPostIds = data
+          .filter(p => p.post_type === 'poll')
+          .map(p => p.id);
+        
+        if (pollPostIds.length > 0) {
+          await fetchPolls(pollPostIds);
+        }
+      } else {
+        setHasMore(false);
+      }
+    } catch (error: any) {
+      console.error("Error loading more posts:", error);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
   const fetchPolls = async (postIds: string[]) => {
     const { data: pollsData } = await supabase
       .from("polls")
@@ -141,14 +221,16 @@ const Feed = () => {
       .in("post_id", postIds);
 
     if (pollsData) {
-      const pollMap = new Map<string, Poll>();
-      pollsData.forEach((poll: any) => {
-        pollMap.set(poll.post_id, {
-          ...poll,
-          options: poll.poll_options || [],
+      setPolls(prev => {
+        const newMap = new Map(prev);
+        pollsData.forEach((poll: any) => {
+          newMap.set(poll.post_id, {
+            ...poll,
+            options: poll.poll_options || [],
+          });
         });
+        return newMap;
       });
-      setPolls(pollMap);
     }
   };
 
@@ -254,6 +336,16 @@ const Feed = () => {
               />
             );
           })}
+          
+          {/* Infinite scroll trigger */}
+          <div ref={loadMoreRef} className="py-4 flex justify-center">
+            {loadingMore && (
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            )}
+            {!hasMore && posts.length > 0 && (
+              <p className="text-sm text-muted-foreground">No more posts</p>
+            )}
+          </div>
           
           {posts.length === 0 && (
             <div className="text-center py-12">

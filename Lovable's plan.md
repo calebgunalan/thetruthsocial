@@ -18,17 +18,19 @@
 - [x] **User Profiles** - Avatar, bio, display name, verification badge
 - [x] **Follow System** - Follow/unfollow users
 - [x] **Close Friends** - Manage close friends list
+- [x] **User Search** - Find users by username/display name with follow button
 
 ### Content & Feed
 - [x] **Posts** - Create text posts with media (images, videos, audio)
-- [x] **Feed** - Personalized feed with realtime updates
-- [x] **Explore Page** - Trending posts, FYP, hashtag discovery
+- [x] **Feed** - Personalized feed with realtime updates + infinite scroll
+- [x] **Explore Page** - Trending posts, FYP, hashtag discovery, People tab
 - [x] **Stories** - 24-hour ephemeral stories with reactions
 - [x] **Shorts** - TikTok-style vertical video feed
 - [x] **Polls** - Create and vote on polls
 - [x] **Hashtags** - Auto-extraction and trending system
 - [x] **Likes & Comments** - Full engagement features
 - [x] **Reposts/Quote Tweets** - Share with optional quote
+- [x] **Infinite Scroll** - Paginated loading on Feed
 
 ### Media
 - [x] **File Upload Hook** - Reusable upload functionality
@@ -71,11 +73,16 @@
 - [x] **Notification Center** - Real-time notifications
 - [x] **Notification Types** - Likes, comments, follows, mentions
 
+### UI/UX
+- [x] **Dark Mode** - Toggle with system preference detection
+- [x] **Theme Toggle** - Sun/Moon icon in navbar
+- [x] **Responsive Design** - Mobile-friendly layouts
+
 ---
 
-## 🚧 In Progress / Partially Implemented
+## 🚧 Blocked Features
 
-### Payments (Blocked)
+### Payments
 - [ ] **In-app Payments** - Stripe integration (blocked: not available in user's country)
 - [ ] **Tipping/Donations** - Send money to creators
 - [ ] **Product Orders** - Order from business catalogues
@@ -85,7 +92,6 @@
 ## 📋 Future Enhancements
 
 ### Performance & Scaling
-- [ ] **Infinite Scroll** - Paginated feeds
 - [ ] **Caching** - Query caching with React Query
 - [ ] **Image Optimization** - Lazy loading, WebP support
 - [ ] **CDN Integration** - Static asset delivery
@@ -93,7 +99,7 @@
 ### Advanced Features
 - [ ] **Video Transcoding** - Multiple resolutions
 - [ ] **Push Notifications** - Browser/mobile push
-- [ ] **Search** - Full-text search across content
+- [ ] **Full-text Search** - ElasticSearch integration
 - [ ] **Admin Dashboard** - Moderation tools
 - [ ] **Analytics** - User engagement metrics
 - [ ] **AR Filters** - Camera filters for stories
@@ -142,7 +148,9 @@ src/
 │   ├── PollCard.tsx
 │   ├── PostCard.tsx
 │   ├── Stories.tsx
-│   └── StreakCard.tsx
+│   ├── StreakCard.tsx
+│   ├── ThemeToggle.tsx
+│   └── UserSearch.tsx
 ├── hooks/
 │   └── useFileUpload.ts
 ├── pages/
