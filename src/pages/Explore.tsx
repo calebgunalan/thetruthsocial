@@ -6,11 +6,12 @@ import Navbar from "@/components/Navbar";
 import PostCard from "@/components/PostCard";
 import LocationMap from "@/components/LocationMap";
 import StreakCard from "@/components/StreakCard";
+import UserSearch from "@/components/UserSearch";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, TrendingUp, Hash, Flame, MapPin, Sparkles, Loader2 } from "lucide-react";
+import { Search, TrendingUp, Hash, Flame, MapPin, Sparkles, Loader2, Users } from "lucide-react";
 
 interface Post {
   id: string;
@@ -262,6 +263,10 @@ const Explore = () => {
                   <Hash className="w-4 h-4" />
                   Hashtags
                 </TabsTrigger>
+                <TabsTrigger value="people" className="flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  People
+                </TabsTrigger>
                 <TabsTrigger value="map" className="flex items-center gap-2">
                   <MapPin className="w-4 h-4" />
                   Map
@@ -335,6 +340,25 @@ const Explore = () => {
                       <p className="text-muted-foreground">No trending hashtags yet</p>
                     </div>
                   )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="people">
+                <div className="space-y-4">
+                  <div className="p-4 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 hairline">
+                    <h3 className="font-semibold mb-3 flex items-center gap-2">
+                      <Users className="w-5 h-5" />
+                      Find People
+                    </h3>
+                    <UserSearch 
+                      placeholder="Search by username or name..." 
+                      showFollowButton={true}
+                      currentUserId={user?.id}
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground text-center">
+                    Search for users to follow and connect with
+                  </p>
                 </div>
               </TabsContent>
 

@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import ThemeToggle from "@/components/ThemeToggle";
 import {
   Home,
   Search,
@@ -83,22 +84,26 @@ const Navbar = () => {
                 <span className="text-sm font-medium">{label}</span>
               </Link>
             ))}
+            <ThemeToggle />
             <Button
               onClick={handleSignOut}
               variant="ghost"
               size="sm"
-              className="ml-2 text-muted-foreground hover:text-destructive"
+              className="ml-1 text-muted-foreground hover:text-destructive"
             >
               <LogOut className="w-4 h-4" />
             </Button>
           </div>
 
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden text-foreground p-2"
-          >
-            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          <div className="md:hidden flex items-center gap-2">
+            <ThemeToggle />
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="text-foreground p-2"
+            >
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
 
         {isMobileMenuOpen && (
