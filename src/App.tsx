@@ -17,6 +17,8 @@ import Collections from "./pages/Collections";
 import Music from "./pages/Music";
 import Playlists from "./pages/Playlists";
 import Business from "./pages/Business";
+import Admin from "./pages/Admin";
+import Search from "./pages/Search";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +44,8 @@ const App = () => (
           <Route path="/music" element={<Music />} />
           <Route path="/playlists" element={<Playlists />} />
           <Route path="/business" element={<Business />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/search" element={<Search />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

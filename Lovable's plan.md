@@ -82,6 +82,17 @@
 ### Security & Account
 - [x] **Report System** - Report posts, users, comments with reasons
 - [x] **Password Reset** - Forgot password flow with email reset
+- [x] **User Roles** - Admin/Moderator/User role system with secure functions
+
+### Admin
+- [x] **Admin Dashboard** - Content moderation and user management
+- [x] **Report Management** - View, resolve, dismiss reports
+- [x] **Role Management** - Grant/revoke admin and moderator roles
+
+### Search
+- [x] **Full-Text Search** - Search across posts, users, and hashtags
+- [x] **Recent Searches** - Save and clear search history
+- [x] **Search Filters** - Filter by posts, users, or hashtags
 
 ---
 
@@ -103,8 +114,6 @@
 
 ### Advanced Features
 - [ ] **Video Transcoding** - Multiple resolutions
-- [ ] **Full-text Search** - ElasticSearch integration
-- [ ] **Admin Dashboard** - Moderation tools
 - [ ] **Analytics** - User engagement metrics
 - [ ] **AR Filters** - Camera filters for stories
 - [ ] **Live Streaming** - Real-time broadcasts
