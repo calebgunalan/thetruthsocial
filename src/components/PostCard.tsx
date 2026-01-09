@@ -13,7 +13,8 @@ import {
   Pin,
   Play,
   Volume2,
-  VolumeX
+  VolumeX,
+  Flag
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -28,10 +29,12 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import MediaDisplay from "@/components/media/MediaDisplay";
+import ReportModal from "@/components/ReportModal";
 
 interface PostCardProps {
   post: {
@@ -81,6 +84,7 @@ const PostCard = ({ post, currentUserId, onRefresh }: PostCardProps) => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [commentsCount, setCommentsCount] = useState(post.comments_count);
+  const [showReport, setShowReport] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -353,6 +357,18 @@ const PostCard = ({ post, currentUserId, onRefresh }: PostCardProps) => {
                     <Share2 className="w-4 h-4 mr-2" />
                     Copy link
                   </DropdownMenuItem>
+                  {post.profiles.id !== currentUserId && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        onClick={() => setShowReport(true)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Flag className="w-4 h-4 mr-2" />
+                        Report post
+                      </DropdownMenuItem>
+                    </>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -521,6 +537,15 @@ const PostCard = ({ post, currentUserId, onRefresh }: PostCardProps) => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Report Modal */}
+      <ReportModal
+        open={showReport}
+        onOpenChange={setShowReport}
+        targetId={post.id}
+        targetType="post"
+        reporterId={currentUserId}
+      />
     </>
   );
 };

@@ -990,6 +990,53 @@ export type Database = {
         }
         Relationships: []
       }
+      reports: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          reason: string
+          report_type: string
+          reporter_id: string
+          reviewed_at: string | null
+          reviewer_notes: string | null
+          status: string
+          target_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          reason: string
+          report_type: string
+          reporter_id: string
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          target_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          reason?: string
+          report_type?: string
+          reporter_id?: string
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          target_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reposts: {
         Row: {
           created_at: string | null

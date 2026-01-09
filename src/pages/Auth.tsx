@@ -147,6 +147,17 @@ const Auth = () => {
             </Button>
           </form>
 
+          {isLogin && (
+            <div className="mt-4 text-center">
+              <a
+                href="/reset-password"
+                className="text-sm text-primary hover:underline transition-smooth"
+              >
+                Forgot your password?
+              </a>
+            </div>
+          )}
+
           <div className="mt-6 text-center hairline-t pt-6">
             <button
               type="button"
