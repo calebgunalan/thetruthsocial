@@ -72,11 +72,16 @@
 ### Notifications
 - [x] **Notification Center** - Real-time notifications
 - [x] **Notification Types** - Likes, comments, follows, mentions
+- [x] **Push Notifications** - Browser push notifications with permission handling
 
 ### UI/UX
 - [x] **Dark Mode** - Toggle with system preference detection
 - [x] **Theme Toggle** - Sun/Moon icon in navbar
 - [x] **Responsive Design** - Mobile-friendly layouts
+
+### Security & Account
+- [x] **Report System** - Report posts, users, comments with reasons
+- [x] **Password Reset** - Forgot password flow with email reset
 
 ---
 
@@ -98,7 +103,6 @@
 
 ### Advanced Features
 - [ ] **Video Transcoding** - Multiple resolutions
-- [ ] **Push Notifications** - Browser/mobile push
 - [ ] **Full-text Search** - ElasticSearch integration
 - [ ] **Admin Dashboard** - Moderation tools
 - [ ] **Analytics** - User engagement metrics
@@ -107,9 +111,7 @@
 
 ### Security
 - [ ] **2FA** - Two-factor authentication
-- [ ] **Account Recovery** - Password reset flow
 - [ ] **Content Moderation** - AI-powered filtering
-- [ ] **Report System** - Flag inappropriate content
 
 ---
 
@@ -144,15 +146,18 @@ src/
 │   ├── MessagingPanel.tsx
 │   ├── MusicPlayer.tsx
 │   ├── Navbar.tsx
+│   ├── NotificationSettings.tsx
 │   ├── PlaylistManager.tsx
 │   ├── PollCard.tsx
 │   ├── PostCard.tsx
+│   ├── ReportModal.tsx
 │   ├── Stories.tsx
 │   ├── StreakCard.tsx
 │   ├── ThemeToggle.tsx
 │   └── UserSearch.tsx
 ├── hooks/
-│   └── useFileUpload.ts
+│   ├── useFileUpload.ts
+│   └── useNotifications.ts
 ├── pages/
 │   ├── Auth.tsx
 │   ├── Business.tsx
@@ -165,6 +170,7 @@ src/
 │   ├── Notifications.tsx
 │   ├── Playlists.tsx
 │   ├── Profile.tsx
+│   ├── ResetPassword.tsx
 │   └── Shorts.tsx
 └── integrations/
     └── supabase/
@@ -173,4 +179,4 @@ src/
 ---
 
 ## Last Updated
-January 7, 2026
+January 9, 2026

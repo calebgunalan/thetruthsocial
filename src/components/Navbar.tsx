@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import ThemeToggle from "@/components/ThemeToggle";
+import NotificationSettings from "@/components/NotificationSettings";
 import {
   Home,
   Search,
@@ -22,9 +23,16 @@ import {
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUserId(data.user?.id || null);
+    });
+  }, []);
 
   const handleSignOut = async () => {
     try {
@@ -84,6 +92,7 @@ const Navbar = () => {
                 <span className="text-sm font-medium">{label}</span>
               </Link>
             ))}
+            <NotificationSettings userId={userId} />
             <ThemeToggle />
             <Button
               onClick={handleSignOut}
@@ -96,6 +105,7 @@ const Navbar = () => {
           </div>
 
           <div className="md:hidden flex items-center gap-2">
+            <NotificationSettings userId={userId} />
             <ThemeToggle />
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
