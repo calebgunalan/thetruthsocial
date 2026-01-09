@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationSettings from "@/components/NotificationSettings";
+import { useUserRole } from "@/hooks/useUserRole";
 import {
   Home,
   Search,
@@ -19,6 +20,7 @@ import {
   Music2,
   Bookmark,
   Building2,
+  Shield,
 } from "lucide-react";
 
 const Navbar = () => {
@@ -33,6 +35,8 @@ const Navbar = () => {
       setUserId(data.user?.id || null);
     });
   }, []);
+
+  const { isAdminOrModerator } = useUserRole(userId);
 
   const handleSignOut = async () => {
     try {
@@ -53,8 +57,9 @@ const Navbar = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  const navLinks = [
+  const baseNavLinks = [
     { to: "/feed", icon: Home, label: "Home" },
+    { to: "/search", icon: Search, label: "Search" },
     { to: "/explore", icon: Search, label: "Explore" },
     { to: "/shorts", icon: Play, label: "Shorts" },
     { to: "/channels", icon: Tv, label: "Channels" },
@@ -65,6 +70,10 @@ const Navbar = () => {
     { to: "/messages", icon: MessageCircle, label: "Messages" },
     { to: "/profile", icon: User, label: "Profile" },
   ];
+
+  const navLinks = isAdminOrModerator
+    ? [...baseNavLinks, { to: "/admin", icon: Shield, label: "Admin" }]
+    : baseNavLinks;
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-card hairline-b shadow-subtle backdrop-blur-sm bg-opacity-95">
