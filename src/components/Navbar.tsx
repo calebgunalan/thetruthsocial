@@ -21,6 +21,7 @@ import {
   Bookmark,
   Building2,
   Shield,
+  BarChart3,
 } from "lucide-react";
 
 const Navbar = () => {
@@ -65,6 +66,7 @@ const Navbar = () => {
     { to: "/channels", icon: Tv, label: "Channels" },
     { to: "/music", icon: Music2, label: "Music" },
     { to: "/business", icon: Building2, label: "Business" },
+    { to: "/analytics", icon: BarChart3, label: "Analytics" },
     { to: "/collections", icon: Bookmark, label: "Saved" },
     { to: "/notifications", icon: Bell, label: "Alerts" },
     { to: "/messages", icon: MessageCircle, label: "Messages" },
