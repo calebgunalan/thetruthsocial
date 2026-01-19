@@ -7,6 +7,7 @@ import PostCard from "@/components/PostCard";
 import LocationMap from "@/components/LocationMap";
 import StreakCard from "@/components/StreakCard";
 import UserSearch from "@/components/UserSearch";
+import TrendingHashtags from "@/components/TrendingHashtags";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -394,24 +395,8 @@ const Explore = () => {
               </ScrollArea>
             </div>
 
-            {/* Trending Hashtags Mini */}
-            <div className="bg-card rounded-lg shadow-subtle hairline p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <Hash className="w-5 h-5 text-primary" />
-                <h2 className="font-semibold">Trending</h2>
-              </div>
-              
-              <div className="space-y-3">
-                {hashtags.slice(0, 5).map((hashtag) => (
-                  <div key={hashtag.id} className="flex items-center justify-between">
-                    <span className="font-medium">#{hashtag.tag}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {hashtag.use_count} posts
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Trending Hashtags Component */}
+            <TrendingHashtags limit={5} />
           </div>
         </div>
       </main>
