@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import PostCard from "@/components/PostCard";
 import BusinessProfileCard from "@/components/BusinessProfileCard";
 import CloseFriendsModal from "@/components/CloseFriendsModal";
+import TwoFactorSetup from "@/components/TwoFactorSetup";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -414,16 +415,18 @@ const Profile = () => {
                       <p className="text-sm">{profile.bio}</p>
                     )}
                     
-                    {/* Close Friends Button */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="mt-4"
-                      onClick={() => setShowCloseFriends(true)}
-                    >
-                      <Star className="w-4 h-4 mr-2" />
-                      Close Friends
-                    </Button>
+                    {/* Action Buttons */}
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowCloseFriends(true)}
+                      >
+                        <Star className="w-4 h-4 mr-2" />
+                        Close Friends
+                      </Button>
+                      <TwoFactorSetup userId={user?.id} />
+                    </div>
                   </>
                 )}
               </div>

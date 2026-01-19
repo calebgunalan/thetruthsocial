@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Image, Video, Music, Send, X, BarChart2, Loader2 } from "lucide-react";
+import { Image, Video, Music, Send, X, BarChart2, Loader2, Shield } from "lucide-react";
 import FileUploader from "@/components/media/FileUploader";
 import { useFileUpload } from "@/hooks/useFileUpload";
+import { useContentModeration } from "@/hooks/useContentModeration";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,6 +32,7 @@ const CreatePost = ({ onPostCreated, userId }: CreatePostProps) => {
   const [pollDuration, setPollDuration] = useState(24); // hours
   
   const { uploadFile, uploading, progress, getMediaType } = useFileUpload();
+  const { checkAndWarn, moderating } = useContentModeration();
   const { toast } = useToast();
 
   // Clean up preview URL when component unmounts or file changes
@@ -72,6 +74,15 @@ const CreatePost = ({ onPostCreated, userId }: CreatePostProps) => {
 
     setLoading(true);
     try {
+      // Check content with AI moderation
+      if (content.trim()) {
+        const isAllowed = await checkAndWarn(content.trim(), 'text');
+        if (!isAllowed) {
+          setLoading(false);
+          return;
+        }
+      }
+
       let mediaUrl = null;
 
       // Upload file if selected
@@ -307,16 +318,16 @@ const CreatePost = ({ onPostCreated, userId }: CreatePostProps) => {
           
           <Button
             onClick={handleSubmit}
-            disabled={loading || uploading || (!content.trim() && !selectedFile)}
+            disabled={loading || uploading || moderating || (!content.trim() && !selectedFile)}
             className="gradient-silver hover:opacity-90 transition-smooth"
             size="sm"
           >
-            {loading || uploading ? (
+            {loading || uploading || moderating ? (
               <Loader2 className="w-4 h-4 mr-1 animate-spin" />
             ) : (
               <Send className="w-4 h-4 mr-1" />
             )}
-            {uploading ? "Uploading..." : "Post"}
+            {moderating ? "Checking..." : uploading ? "Uploading..." : "Post"}
           </Button>
         </div>
       </div>
